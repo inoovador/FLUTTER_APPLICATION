@@ -1,0 +1,245 @@
+{
+  "name": "Torneos App Security Monitoring",
+  "nodes": [
+    {
+      "id": "webhook_receiver",
+      "type": "n8n-nodes-base.webhook",
+      "position": [250, 300],
+      "webhookId": "torneos-security-webhook",
+      "parameters": {
+        "path": "security",
+        "method": "POST",
+        "authentication": "headerAuth",
+        "headerAuth": {
+          "name": "X-API-Key",
+          "value": "your-secure-api-key"
+        }
+      }
+    },
+    {
+      "id": "event_classifier",
+      "type": "n8n-nodes-base.switch",
+      "position": [450, 300],
+      "parameters": {
+        "dataPropertyName": "event.type",
+        "values": {
+          "string": [
+            {
+              "name": "SQL Injection",
+              "value": "sqlInjectionAttempt"
+            },
+            {
+              "name": "Multiple Failed Logins",
+              "value": "accountLocked"
+            },
+            {
+              "name": "Unknown Device",
+              "value": "unknownDevice"
+            },
+            {
+              "name": "Suspicious Activity",
+              "value": "suspiciousActivity"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "sql_injection_handler",
+      "type": "n8n-nodes-base.function",
+      "position": [650, 200],
+      "parameters": {
+        "functionCode": "// Analizar intento de SQL injection\nconst event = items[0].json;\nconst severity = 'CRITICAL';\nconst timestamp = new Date().toISOString();\n\n// Preparar respuesta\nreturn [{\n  json: {\n    action: 'block_user',\n    actionData: {\n      userId: event.userId,\n      reason: 'SQL Injection Attempt',\n      duration: 86400 // 24 horas\n    },\n    alert: {\n      severity: severity,\n      message: `SQL Injection attempt detected from user ${event.userId}`,\n      pattern: event.data.pattern,\n      input: event.data.input,\n      timestamp: timestamp\n    }\n  }\n}];"
+      }
+    },
+    {
+      "id": "failed_login_handler",
+      "type": "n8n-nodes-base.function",
+      "position": [650, 300],
+      "parameters": {
+        "functionCode": "// Manejar cuenta bloqueada por múltiples intentos fallidos\nconst event = items[0].json;\nconst attempts = event.data.attempts || 0;\n\nlet action = 'monitor';\nlet duration = 1800; // 30 minutos\n\nif (attempts > 5) {\n  action = 'block_user';\n  duration = 3600; // 1 hora\n} else if (attempts > 10) {\n  action = 'block_user';\n  duration = 86400; // 24 horas\n}\n\nreturn [{\n  json: {\n    action: action,\n    actionData: {\n      userId: event.userId,\n      reason: 'Multiple failed login attempts',\n      attempts: attempts,\n      duration: duration\n    },\n    alert: {\n      severity: 'HIGH',\n      message: `User ${event.userId} locked after ${attempts} failed attempts`,\n      timestamp: new Date().toISOString()\n    }\n  }\n}];"
+      }
+    },
+    {
+      "id": "unknown_device_handler",
+      "type": "n8n-nodes-base.function",
+      "position": [650, 400],
+      "parameters": {
+        "functionCode": "// Verificar dispositivo desconocido\nconst event = items[0].json;\nconst deviceInfo = event.data;\n\n// Verificar si es un patrón sospechoso\nconst isSuspicious = deviceInfo.fingerprint && \n                    deviceInfo.fingerprint.includes('emulator') ||\n                    deviceInfo.fingerprint.includes('root');\n\nreturn [{\n  json: {\n    action: isSuspicious ? 'require_2fa' : 'monitor',\n    actionData: {\n      userId: event.userId,\n      deviceId: deviceInfo.deviceId,\n      fingerprint: deviceInfo.fingerprint,\n      requireVerification: true\n    },\n    alert: {\n      severity: isSuspicious ? 'HIGH' : 'MEDIUM',\n      message: `Unknown device detected for user ${event.userId}`,\n      deviceInfo: deviceInfo,\n      timestamp: new Date().toISOString()\n    }\n  }\n}];"
+      }
+    },
+    {
+      "id": "ai_analyzer",
+      "type": "n8n-nodes-base.openAi",
+      "position": [850, 300],
+      "parameters": {
+        "resource": "text",
+        "operation": "complete",
+        "model": "gpt-4",
+        "prompt": "Analiza el siguiente evento de seguridad y determina si representa una amenaza real:\n\n{{$json}}\n\nResponde con un JSON que incluya:\n- threat_level: (low, medium, high, critical)\n- is_real_threat: (true/false)\n- recommended_actions: [array de acciones]\n- reasoning: explicación breve",
+        "maxTokens": 500
+      }
+    },
+    {
+      "id": "notification_sender",
+      "type": "n8n-nodes-base.emailSend",
+      "position": [1050, 200],
+      "parameters": {
+        "fromEmail": "security@torneosapp.com",
+        "toEmail": "admin@torneosapp.com",
+        "subject": "Security Alert: {{$node[\"ai_analyzer\"].json.threat_level}} - {{$node[\"event_classifier\"].json.event.type}}",
+        "text": "Security Event Detected\n\nType: {{$json.event.type}}\nUser: {{$json.event.userId}}\nThreat Level: {{$node[\"ai_analyzer\"].json.threat_level}}\n\nDetails:\n{{$json.event.data}}\n\nAI Analysis:\n{{$node[\"ai_analyzer\"].json.reasoning}}\n\nRecommended Actions:\n{{$node[\"ai_analyzer\"].json.recommended_actions}}",
+        "attachments": []
+      }
+    },
+    {
+      "id": "database_logger",
+      "type": "n8n-nodes-base.postgres",
+      "position": [1050, 400],
+      "parameters": {
+        "operation": "insert",
+        "table": "security_events",
+        "columns": "event_type,user_id,severity,data,ai_analysis,timestamp",
+        "columnValues": {
+          "event_type": "={{$json.event.type}}",
+          "user_id": "={{$json.event.userId}}",
+          "severity": "={{$node[\"ai_analyzer\"].json.threat_level}}",
+          "data": "={{JSON.stringify($json.event.data)}}",
+          "ai_analysis": "={{JSON.stringify($node[\"ai_analyzer\"].json)}}",
+          "timestamp": "={{new Date().toISOString()}}"
+        }
+      }
+    },
+    {
+      "id": "response_builder",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "position": [1250, 300],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{JSON.stringify({\n  status: 'processed',\n  action: $node[\"ai_analyzer\"].json.is_real_threat ? $json.action : 'monitor',\n  recommendations: $node[\"ai_analyzer\"].json.recommended_actions,\n  timestamp: new Date().toISOString()\n})}}"
+      }
+    }
+  ],
+  "connections": {
+    "webhook_receiver": {
+      "main": [
+        [
+          {
+            "node": "event_classifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "event_classifier": {
+      "main": [
+        [
+          {
+            "node": "sql_injection_handler",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "failed_login_handler",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "unknown_device_handler",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "ai_analyzer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "sql_injection_handler": {
+      "main": [
+        [
+          {
+            "node": "ai_analyzer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "failed_login_handler": {
+      "main": [
+        [
+          {
+            "node": "ai_analyzer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "unknown_device_handler": {
+      "main": [
+        [
+          {
+            "node": "ai_analyzer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ai_analyzer": {
+      "main": [
+        [
+          {
+            "node": "notification_sender",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "database_logger",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "notification_sender": {
+      "main": [
+        [
+          {
+            "node": "response_builder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "database_logger": {
+      "main": [
+        [
+          {
+            "node": "response_builder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "security-error-handler"
+  }
+}

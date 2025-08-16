@@ -1,0 +1,25 @@
+Soluciones para el error "System isn't responding" en el emulador Android:
+
+1. AUMENTAR MEMORIA DEL EMULADOR:
+   - Abre Android Studio
+   - Ve a AVD Manager (Tools > AVD Manager)
+   - Click en el lápiz (Edit) de tu emulador
+   - Ve a "Show Advanced Settings"
+   - Aumenta la RAM a 4096 MB o más
+   - Aumenta VM heap a 512 MB
+
+2. CONFIGURACIÓN DE GRÁFICOS:
+   - En las opciones avanzadas del emulador
+   - Cambia "Graphics" de "Automatic" a "Software - GLES 2.0"
+
+3. DESACTIVAR ANIMACIONES EN EL EMULADOR:
+   - En el emulador, ve a Settings > Developer options
+   - Desactiva todas las animaciones (Window animation scale, Transition animation scale, Animator duration scale)
+
+4. LIMPIAR DATOS DEL EMULADOR:
+   - En AVD Manager, click en la flecha hacia abajo
+   - Selecciona "Wipe Data"
+
+5. SI NADA FUNCIONA:
+   - Crea un nuevo emulador con API 33 o 34 (en lugar de API 36)
+   - Usa un dispositivo con menor resolución (Pixel 3a en lugar de Pixel 6)

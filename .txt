@@ -1,0 +1,34 @@
+Gestión de inscripciones por usuario
+Registro y login: Implementa autenticación usando Firebase, Supabase o una API propia con bases como PostgreSQL. Permite a cada usuario registrar una cuenta, gestionar su perfil y asociar inscripciones a torneos o eventos.
+
+Panel de inscripciones: Muestra al usuario las inscripciones activas, fechas, estado de pago y permite descargar comprobantes o modificar datos si es necesario.
+
+2. Ver quiénes pagaron y fechas
+Listado de jugadores o usuarios por evento/equipo: Muestra quién completó el pago y cuándo utilizando estados sincronizados con la pasarela de pago.
+
+Funciones de administrador: Permite ver registros completos y filtrar por estado de pago, exportar listas o enviar recordatorios a usuarios pendientes de pago.
+
+3. Pasarela de pago
+Stripe, PayPal, Google Pay y Apple Pay: Puedes integrar pagos seguros usando plugins como stripe_payment, paypal_sdk, o APIs nativas. Genera solicitudes de pago personalizadas, verifica el estado y actualiza la inscripción automáticamente al aprobarse la transacción.
+
+Gestión de recibos: Enlaza la información de pago en la base de datos para asociar pagos y fechas a las inscripciones.
+
+4. Gestión de equipos
+Crear, unir y administrar equipos: Permite que usuarios creen equipos, sumen nuevos miembros mediante código/invitación y gestionen roles (capitán, jugador).
+
+Tareas administrativas: Maneja listas, chat integrado, asignación de roles y recursos compartidos dentro del equipo.
+
+5. Perfil del jugador
+Ficha personalizada: Perfil con datos personales, estadísticas, foto y logros del jugador. Usa widgets personalizados, animaciones y posibilidad de edición.
+
+Historial y progreso: Incluye historial de partidos, goles, tarjetas, etc.
+
+6. Feed de álbum multimedia
+Gestión de fotos y videos: Usa paquetes como photo_manager o implementa tu propio media picker para que usuarios y administradores suban fotos y videos de eventos/partidos.
+
+Visualización estilo red social: Feed tipo grilla o stories, ordenado por fecha o relevancia.
+
+7. Dashboard de estadística
+Visualización de estadísticas: Gráficas con goles, partidos jugados, rendimiento del equipo o del jugador. Utiliza paquetes de gráficos para Flutter y obtiene los datos de la base correspondiente.
+
+Panel para entrenadores y administradores: Análisis en tiempo real de inscripciones, pagos, actividad y más.

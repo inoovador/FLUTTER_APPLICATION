@@ -1,0 +1,15 @@
+C:\Users\limac\OneDrive\Escritorio\flutter_application_1\android>flutter run
+Changing current working directory to: C:\Users\limac\OneDrive\Escritorio\flutter_application_1
+Launching lib\main.dart on sdk gphone64 x86 64 in debug mode...
+I/flutter (11551): [IMPORTANT:flutter/shell/platform/android/android_context_gl_impeller.cc(94)] Using the Impeller rendering backend (OpenGLES).
+Your project is configured with Android NDK 26.3.11579264, but the following plugin(s) depend on a different Android NDK version:
+- path_provider_android requires Android NDK 27.0.12077973
+Fix this issue by using the highest Android NDK version (they are backward compatible).
+Add the following to C:\Users\limac\OneDrive\Escritorio\flutter_application_1\android\app\build.gradle.kts:
+
+    android {
+        ndkVersion = "27.0.12077973"
+        ...
+    }
+Running Gradle task 'assembleDebug'...                                 -
+

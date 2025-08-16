@@ -1,0 +1,16 @@
+C:\Users\limac\OneDrive\Escritorio\flutter_application_1> flutter run
+Launching lib\main.dart on sdk gphone64 x86 64 in debug mode...
+Invalid depfile: C:\Users\limac\OneDrive\Escritorio\flutter_application_1\.dart_tool\flutter_build\1957ce2dd85550c1e60a780a4b3d1c2d\kernel_snapshot_program.d
+Invalid depfile: C:\Users\limac\OneDrive\Escritorio\flutter_application_1\.dart_tool\flutter_build\1957ce2dd85550c1e60a780a4b3d1c2d\kernel_snapshot_program.d
+Invalid depfile: C:\Users\limac\OneDrive\Escritorio\flutter_application_1\.dart_tool\flutter_build\1957ce2dd85550c1e60a780a4b3d1c2d\kernel_snapshot_program.d
+Invalid depfile: C:\Users\limac\OneDrive\Escritorio\flutter_application_1\.dart_tool\flutter_build\1957ce2dd85550c1e60a780a4b3d1c2d\kernel_snapshot_program.d
+Checking the license for package CMake 3.22.1 in C:\Users\limac\AppData\Local\Android\sdk\licenses
+License for package CMake 3.22.1 accepted.
+Preparing "Install CMake 3.22.1 v.3.22.1".
+"Install CMake 3.22.1 v.3.22.1" ready.
+Installing CMake 3.22.1 in C:\Users\limac\AppData\Local\Android\sdk\cmake\3.22.1
+"Install CMake 3.22.1 v.3.22.1" complete.
+"Install CMake 3.22.1 v.3.22.1" finished.
+Running Gradle task 'assembleDebug'...                            264,6s
+√ Built build\app\outputs\flutter-apk\app-debug.apk
+Installing build\app\outputs\flutter-apk\app-debug.apk...          48,0s                              \
